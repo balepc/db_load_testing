@@ -2,9 +2,9 @@ require 'user'
 
 class FlatLoad
   
-  TOTAL_CONCURENT     = 50
-  TOTAL_ITERATIONS    = 20
-  WARM_UP_ITERATIONS  = 1000
+#  TOTAL_CONCURENT     = 10
+  TOTAL_ITERATIONS    = 10
+  WARM_UP_ITERATIONS  = 100
   
   attr_accessor :max_time, :min_time, :total_time, :total_queries, :failures
   
@@ -13,19 +13,21 @@ class FlatLoad
     self.min_time = 999
   end
    
-  def process
+  def process(concurrent)
+    puts "\n\n Concurrent #{concurrent}"
     warm_up
     
     threads = []
     0.upto(TOTAL_ITERATIONS) do
-      0.upto(TOTAL_CONCURENT) do
+      0.upto(concurrent) do
         user = User.new
         threads << Thread.new { report_time(user.do_some_work) }
       end
       sleep 1
     end
+    puts "Step1"
     threads.each{|t| t.join}
-    
+    puts "Step2"
     print_summary
   end
   
@@ -61,4 +63,11 @@ class FlatLoad
   
 end
 
-FlatLoad.new.process
+FlatLoad.new.process 10
+FlatLoad.new.process 30
+FlatLoad.new.process 50
+FlatLoad.new.process 100
+FlatLoad.new.process 150
+FlatLoad.new.process 250
+FlatLoad.new.process 500
+FlatLoad.new.process 1000

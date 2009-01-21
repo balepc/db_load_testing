@@ -1,4 +1,5 @@
 require 'connection/connection_proxy'
+require 'connection/balanced_connection_proxy'
 require 'scenarios_pool'
 
 class User
@@ -8,7 +9,8 @@ class User
   attr_accessor :proxy, :name
   
   def initialize
-    self.proxy = ConnectionProxy.new
+#    self.proxy = ConnectionProxy.new
+    self.proxy = BalancedConnectionProxy.new
     self.name  = "User_#{Time.now.to_i}"
   rescue Mysql::Error
     @failed = true

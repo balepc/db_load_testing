@@ -1,20 +1,29 @@
 require 'mysql'
 
-class ConnectionProxy
+class BalancedConnectionProxy
   
-  attr_accessor :connection
+  attr_accessor :connection_read
+  attr_accessor :connection_write
+  
   attr_accessor :max_time, :min_time, :total_time, :total_queries, :failures
   
 #  HOST = 'ec2-174-129-177-131.compute-1.amazonaws.com'
-  HOST = 'localhost'
-  USERNAME = 'root'
-  PASSWORD = 'dx87vv30'
-  DATABASE = 'mtv_staging'
+  MASTER_HOST = 'localhost'
+  MASTER_USERNAME = 'root'
+  MASTER_PASSWORD = 'dx87vv30'
+  MASTER_DATABASE = 'mtv_staging'
+  
+  SLAVE_HOST = 'localhost'
+  SLAVE_USERNAME = 'root'
+  SLAVE_PASSWORD = 'dx87vv30'
+  SLAVE_DATABASE = 'mtv_staging'
   
   ITERATIONS_COUNT = 10
   
   def initialize()
-    self.connection = establish_connection({:host=>HOST, :username=>USERNAME, :password=>PASSWORD, :database=>DATABASE })
+    self.connection_read = establish_connection({:host=>SLAVE_HOST, :username=>SLAVE_USERNAME, :password=>SLAVE_PASSWORD, :database=>SLAVE_DATABASE })
+    self.connection_write = establish_connection({:host=>MASTER_HOST, :username=>MASTER_USERNAME, :password=>MASTER_PASSWORD, :database=>MASTER_DATABASE })
+    
     self.max_time = 0.0
     self.total_time = 0.0
     self.min_time = 999.0
@@ -24,11 +33,12 @@ class ConnectionProxy
   
   def execute_query(query)
     timer = Time.now
-      
+    
+    connection = get_connection(query)
     query.split(";").each do |sql|
-      self.connection.query(sql)
+      connection.query(sql)
     end
-    self.connection.query("COMMIT")
+    connection.query("COMMIT")
       
     report_time(Time.now - timer)
   rescue Mysql::Error
@@ -51,6 +61,16 @@ class ConnectionProxy
     self.min_time = time_spent if time_spent < self.min_time
     self.total_time += time_spent
     self.total_queries += 1
+  end
+  
+  def get_connection(query)
+    if query.downcase.include?("insert") or query.downcase.include?('update')
+      puts "write"
+      self.connection_write
+    else
+      puts "read"
+      self.connection_read
+    end
   end
   
 end
