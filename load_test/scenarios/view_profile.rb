@@ -13,5 +13,9 @@ class ViewProfileScenario < Scenario
       SELECT * FROM assets WHERE (assets.user_id = 1) ORDER BY assets.created_at desc LIMIT 0, 15
     }
   end
+  
+  def name
+    "Scenario #8: View profile"
+  end
 
 end

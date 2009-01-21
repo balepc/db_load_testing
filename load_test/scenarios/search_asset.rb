@@ -10,5 +10,9 @@ class SearchAssetScenario < Scenario
         order by assets.user_id, assets.id
     }
   end
+  
+  def name
+    "Scenario #7: Search asset"
+  end
 
 end

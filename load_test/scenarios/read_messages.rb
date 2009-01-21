@@ -7,5 +7,9 @@ class ReadMessagesScenario < Scenario
       SELECT * FROM users WHERE (users.id = 2)
     }
   end
+  
+  def name
+    "Scenario #4: Read messages"
+  end
 
 end

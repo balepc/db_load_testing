@@ -7,6 +7,10 @@ class ReadPostsScenario < Scenario
       SELECT * FROM posts WHERE (posts.guild_id = 1) ORDER BY posts.created_at desc LIMIT 0, 15
     }
   end
+  
+  def name
+    "Scenario #5: Read posts"
+  end
 
 end
 

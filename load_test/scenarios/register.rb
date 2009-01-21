@@ -5,6 +5,10 @@ class RegisterScenario < Scenario
       INSERT INTO users(login) VALUES (UUID())
     }
   end
+  
+  def name
+    "Scenario #6: Register"
+  end
 
 end
 
