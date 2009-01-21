@@ -3,7 +3,7 @@ require 'mysql'
 class ConnectionProxy
   
   attr_accessor :connection
-  attr_accessor :max_time, :min_time, :total_time, :total_queries
+  attr_accessor :max_time, :min_time, :total_time, :total_queries, :failures
   
   HOST = 'localhost'
   USERNAME = 'root'
@@ -18,6 +18,7 @@ class ConnectionProxy
     self.total_time = 0.0
     self.min_time = 999.0
     self.total_queries = 0
+    self.failures = 0
   end
   
   def execute_query(query)
@@ -29,11 +30,14 @@ class ConnectionProxy
     self.connection.query("COMMIT")
       
     report_time(Time.now - timer)
+  rescue Mysql::Error
+    self.failures += 1
   end
   
   def summary
     {:min_time=>self.min_time, :max_time=>self.max_time, 
-      :total_time=>self.total_time, :total_queries=>self.total_queries}
+      :total_time=>self.total_time, :total_queries=>self.total_queries,
+      :failures=>self.failures }
   end
   
   private
