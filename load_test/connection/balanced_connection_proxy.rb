@@ -18,12 +18,11 @@ class BalancedConnectionProxy
   SLAVE_PASSWORD = 'dx87vv30'
   SLAVE_DATABASE = 'mtv_staging'
   
+  BALANCING = ''
+  
   ITERATIONS_COUNT = 10
   
   def initialize()
-    self.connection_read = establish_connection({:host=>SLAVE_HOST, :username=>SLAVE_USERNAME, :password=>SLAVE_PASSWORD, :database=>SLAVE_DATABASE })
-    self.connection_write = establish_connection({:host=>MASTER_HOST, :username=>MASTER_USERNAME, :password=>MASTER_PASSWORD, :database=>MASTER_DATABASE })
-    
     self.max_time = 0.0
     self.total_time = 0.0
     self.min_time = 999.0
@@ -64,13 +63,23 @@ class BalancedConnectionProxy
   end
   
   def get_connection(query)
-    if query.downcase.include?("insert") or query.downcase.include?('update')
-      puts "write"
-      self.connection_write
-    else
+    if query.downcase.include?("join")
       puts "read"
-      self.connection_read
+      connection_read
+    else
+      puts "write"
+      connection_write
     end
+  end
+  
+  def connection_read
+    self.connection_read ||= establish_connection({:host=>SLAVE_HOST, :username=>SLAVE_USERNAME, :password=>SLAVE_PASSWORD, :database=>SLAVE_DATABASE })
+    self.connection_read
+  end
+  
+  def connection_write
+    self.connection_write ||= establish_connection({:host=>MASTER_HOST, :username=>MASTER_USERNAME, :password=>MASTER_PASSWORD, :database=>MASTER_DATABASE })
+    self.connection_write
   end
   
 end
